@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "387596629854",
+    "firebase_url": "https://runa-82be9.firebaseio.com",
+    "project_id": "runa-82be9",
+    "storage_bucket": "runa-82be9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:387596629854:android:a3c6080d187e8406",
+        "android_client_info": {
+          "package_name": "com.example.andro.entertainmenttrip"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "387596629854-kmrsk0evo5qt5c9n06gacc58bkib83ks.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.andro.entertainmenttrip",
+            "certificate_hash": "e414dea6755056f8574e6438051a5b09d7029ef9"
+          }
+        },
+        {
+          "client_id": "387596629854-avsp2dgar2c4svhk98sj2l7fit1udoma.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEp1I6HtACYh87mkGlrvlbWK_oUaVsxQk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "387596629854-avsp2dgar2c4svhk98sj2l7fit1udoma.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
