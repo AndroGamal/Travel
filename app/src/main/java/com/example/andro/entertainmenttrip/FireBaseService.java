@@ -1,6 +1,7 @@
 package com.example.andro.entertainmenttrip;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
@@ -41,7 +42,8 @@ public class FireBaseService extends Service {
                                 if (dataSnapshot != null) {
                                     for (DataSnapshot son : dataSnapshot.getChildren()) {
                                         trip o = son.getValue(trip.class);
-                                       notificationManager.notify(i, new NotificationCompat.Builder(FireBaseService.this).setSmallIcon(R.drawable.ic_menu_send).setContentText("Price : " + o.getPrice() + "$" + "        " + "Palace : " + o.getPalace()).setContentTitle(o.getName()).setDefaults(Notification.DEFAULT_ALL).build());
+                                       notificationManager.notify(i, new NotificationCompat.Builder(FireBaseService.this).setSmallIcon(R.drawable.ic_menu_send).setContentText("Price : " + o.getPrice() + "$" + "        " + "Palace : " + o.getPalace()).setContentTitle(o.getName()).setDefaults(Notification.DEFAULT_ALL).setContentIntent(
+                                               PendingIntent.getActivity(FireBaseService.this, 0, new Intent(FireBaseService.this, MainActivity.class), 0)).build());
                                         i++;
                                         o.setRead(true);
                                         son.getRef().setValue(o);
@@ -56,7 +58,7 @@ public class FireBaseService extends Service {
                 });
 
             }
-        }, 0, 60000);
+        }, 0, 600);
         return super.onStartCommand(intent, flags, startId);
     }
 
