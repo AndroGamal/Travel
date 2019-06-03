@@ -43,7 +43,7 @@ public class FireBaseService extends Service {
                                     for (DataSnapshot son : dataSnapshot.getChildren()) {
                                         trip o = son.getValue(trip.class);
                                        notificationManager.notify(i, new NotificationCompat.Builder(FireBaseService.this).setSmallIcon(R.drawable.ic_menu_send).setContentText("Price : " + o.getPrice() + "$" + "        " + "Palace : " + o.getPalace()).setContentTitle(o.getName()).setDefaults(Notification.DEFAULT_ALL).setContentIntent(
-                                               PendingIntent.getActivity(FireBaseService.this, 0, new Intent(FireBaseService.this, MainActivity.class), 0)).build());
+                                               PendingIntent.getActivity(FireBaseService.this, 0, new Intent(FireBaseService.this, MainActivity.class), 0)).setAutoCancel(true).build());
                                         i++;
                                         o.setRead(true);
                                         son.getRef().setValue(o);
