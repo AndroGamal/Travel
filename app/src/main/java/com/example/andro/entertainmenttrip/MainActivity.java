@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+if(!select.matches("")){
                 query = firebase.orderByChild("name").equalTo(select);
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -115,7 +115,10 @@ public class MainActivity extends AppCompatActivity
                     public void onCancelled(DatabaseError databaseError) {
 
                     }
-                });
+                });}
+                else {
+    Toast.makeText(MainActivity.this, "please select item", Toast.LENGTH_SHORT).show();
+}
             }
         });
     }
