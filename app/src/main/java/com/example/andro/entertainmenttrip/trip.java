@@ -1,6 +1,7 @@
 package com.example.andro.entertainmenttrip;
 
 
+
 public class trip {
     private String name;
     private double price;
@@ -16,10 +17,10 @@ public class trip {
     }
 
     public void setRead(boolean read) {
-        this.read = read;
+      this.read=read;
     }
 
-    public boolean getread() {
+    public boolean  getread() {
         return read;
     }
 

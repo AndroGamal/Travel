@@ -32,6 +32,12 @@ public class FireBaseService extends Service {
     int i = 0;
 
     @Override
+    public void onDestroy() {
+        timer.cancel();
+        super.onDestroy();
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         timer.schedule(new TimerTask() {
             @Override
@@ -66,7 +72,7 @@ public class FireBaseService extends Service {
     public void onCreate() {
         super.onCreate();
         notificationManager = (NotificationManager) getSystemService(FireBaseService.NOTIFICATION_SERVICE);
-        firebase = FirebaseDatabase.getInstance().getReference("runa").child("user");
+        firebase = FirebaseDatabase.getInstance().getReference("user").child(MainActivity.prefs.getString("email",null)).child("trip");
         query = firebase.orderByChild("read").equalTo(false);
         timer = new Timer();
     }
