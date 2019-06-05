@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,15 +32,16 @@ public class MainActivity extends AppCompatActivity
     ListView listview;
     ArrayList list = new ArrayList();
     ArrayList<String> listname = new ArrayList();
-    DatabaseReference firebase,user,alluser,firebase1;
+    DatabaseReference firebase, user, alluser, firebase1;
     Button delete, insert, enter;
     EditText name, price, palace, emailed;
     static String select = "";
     Query query;
-    static SharedPreferences.Editor email ;
+    static SharedPreferences.Editor email;
     static SharedPreferences prefs;
     trip o;
-    boolean n;
+    boolean n, open;
+
     public void read() {
 
         firebase.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -47,10 +49,10 @@ public class MainActivity extends AppCompatActivity
             public void onDataChange(DataSnapshot dataSnapshot) {
                 list.clear();
                 for (DataSnapshot g : dataSnapshot.getChildren()) {
-                      o= g.getValue(trip.class);
-                       list.add(o);
-                       listname.add(o.getName());
-                    }
+                    o = g.getValue(trip.class);
+                    list.add(o);
+                    listname.add(o.getName());
+                }
                 listview.setAdapter(new myadapter(MainActivity.this, R.layout.item, list));
             }
 
@@ -76,18 +78,20 @@ public class MainActivity extends AppCompatActivity
         price = findViewById(R.id.price);
         enter = findViewById(R.id.enter);
         emailed = findViewById(R.id.email);
-        email = getSharedPreferences("Email",MODE_MULTI_PROCESS).edit();
-        prefs = getSharedPreferences("Email",MODE_MULTI_PROCESS);
-        if (prefs.getString("email",new String())!=null) {
+        email = getSharedPreferences("Email", MODE_MULTI_PROCESS).edit();
+        prefs = getSharedPreferences("Email", MODE_MULTI_PROCESS);
+        open = false;
+        alluser = FirebaseDatabase.getInstance().getReference("user");
+        if (!prefs.getString("email", new String()).matches("")) {
+            open = true;
             findViewById(R.id.login).setVisibility(View.GONE);
             findViewById(R.id.x).setVisibility(View.VISIBLE);
-            firebase = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email",new String())).child("trip");
-            alluser= FirebaseDatabase.getInstance().getReference("user");
+            firebase = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email", new String())).child("trip");
             read();
         }
-        stopService(new Intent(MainActivity.this,FireBaseService.class));
+        stopService(new Intent(MainActivity.this, FireBaseService.class));
         FireBaseService.close();
-        startService(new Intent(MainActivity.this,FireBaseService.class));
+        startService(new Intent(MainActivity.this, FireBaseService.class));
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -99,31 +103,34 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (!name.getText().toString().matches("") && !palace.getText().toString().matches("") && !price.getText().toString().matches("")) {
-                alluser.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        list.clear();
-                        trip trip1 = new trip();
-                        for (DataSnapshot g : dataSnapshot.getChildren()) {
-                            user = FirebaseDatabase.getInstance().getReference("user").child(g.getKey()).child("trip");
-                            trip1.setName(name.getText().toString());
-                            trip1.setPalace(palace.getText().toString());
-                            trip1.setPrice(Double.parseDouble(price.getText().toString()));
-                            trip1.setRead(false);
-                            user.push().setValue(trip1);
+                    alluser.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            list.clear();
+                            trip trip1 = new trip();
+                            for (DataSnapshot g : dataSnapshot.getChildren()) {
+                                user = FirebaseDatabase.getInstance().getReference("user").child(g.getKey()).child("trip");
+                                trip1.setName(name.getText().toString());
+                                trip1.setPalace(palace.getText().toString());
+                                trip1.setPrice(Double.parseDouble(price.getText().toString()));
+                                trip1.setRead(false);
+                                user.push().setValue(trip1);
+                            }
                         }
-                    }
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
 
-                    }});
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                     Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_SHORT).show();
                 } else {
-                        Toast.makeText(MainActivity.this, "please complete data", Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(MainActivity.this, "please complete data", Toast.LENGTH_SHORT).show();
+                }
 
 
-                }});
+            }
+        });
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -143,12 +150,13 @@ public class MainActivity extends AppCompatActivity
 
                                     @Override
                                     public void onCancelled(DatabaseError databaseError) {
-                                                                            }
+                                    }
                                 });
 
                             }
                             Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_SHORT).show();
                         }
+
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
 
@@ -163,35 +171,40 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (!emailed.getText().toString().matches("")) {
-                    stopService(new Intent(MainActivity.this,FireBaseService.class));
+                    open = true;
+                    stopService(new Intent(MainActivity.this, FireBaseService.class));
                     FireBaseService.close();
-                    email.putString("email",emailed.getText().toString());
+                    email.putString("email", emailed.getText().toString());
                     email.commit();
-                    n=true;
-                    firebase1 = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email",new String()));
+                    n = true;
+                    firebase1 = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email", new String()));
                     alluser.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                           for(DataSnapshot g: dataSnapshot.getChildren()){
-                             if(g.getKey().equals(prefs.getString("email",new String()))){
-                                 n=false;break;
-                             }
-                           }
-                           if(n){firebase1.push().setValue("id"); }
+                            for (DataSnapshot g : dataSnapshot.getChildren()) {
+                                if (g.getKey().equals(prefs.getString("email", new String()))) {
+                                    n = false;
+                                    break;
+                                }
+                            }
+                            if (n) {
+                                firebase1.push().setValue("id");
+                            }
                         }
+
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
 
-                        }});
-                    firebase = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email",new String())).child("trip");
-                    startService(new Intent(MainActivity.this,FireBaseService.class));
+                        }
+                    });
+                    firebase = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email", new String())).child("trip");
+                    startService(new Intent(MainActivity.this, FireBaseService.class));
                     Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_SHORT).show();
                     findViewById(R.id.x).setVisibility(View.VISIBLE);
                     findViewById(R.id.in).setVisibility(View.GONE);
                     findViewById(R.id.login).setVisibility(View.GONE);
                     read();
-                }
-                else {
+                } else {
                     Toast.makeText(MainActivity.this, "please enter your Email ", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -234,31 +247,34 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            findViewById(R.id.x).setVisibility(View.GONE);
-            findViewById(R.id.in).setVisibility(View.GONE);
-            findViewById(R.id.login).setVisibility(View.VISIBLE);
-        } else if (id == R.id.nav_gallery) {
-            findViewById(R.id.x).setVisibility(View.VISIBLE);
-            findViewById(R.id.in).setVisibility(View.GONE);
-            findViewById(R.id.login).setVisibility(View.GONE);
-            read();
+        if (open) {
+            if (id == R.id.nav_camera) {
+                findViewById(R.id.x).setVisibility(View.GONE);
+                findViewById(R.id.in).setVisibility(View.GONE);
+                findViewById(R.id.login).setVisibility(View.VISIBLE);
+            } else if (id == R.id.nav_gallery) {
+                findViewById(R.id.x).setVisibility(View.VISIBLE);
+                findViewById(R.id.in).setVisibility(View.GONE);
+                findViewById(R.id.login).setVisibility(View.GONE);
+                read();
             } else if (id == R.id.nav_slideshow) {
-            findViewById(R.id.login).setVisibility(View.GONE);
-            findViewById(R.id.x).setVisibility(View.GONE);
-            findViewById(R.id.in).setVisibility(View.VISIBLE);
+                findViewById(R.id.login).setVisibility(View.GONE);
+                findViewById(R.id.x).setVisibility(View.GONE);
+                findViewById(R.id.in).setVisibility(View.VISIBLE);
 
-        } else if (id == R.id.nav_manage) {
+            } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share) {
+            } else if (id == R.id.nav_share) {
 
-        } else if (id == R.id.nav_send) {
+            } else if (id == R.id.nav_send) {
 
+            }
+        } else {
+            Toast.makeText(this, "please enter your name", Toast.LENGTH_SHORT).show();
         }
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+
         return true;
     }
 }
