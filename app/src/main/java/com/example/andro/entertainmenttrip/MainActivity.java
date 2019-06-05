@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity
     ListView listview;
     ArrayList list = new ArrayList();
     ArrayList<String> listname = new ArrayList();
-    DatabaseReference firebase,user,alluser;
+    DatabaseReference firebase,user,alluser,firebase1;
     Button delete, insert, enter;
     EditText name, price, palace, emailed;
     static String select = "";
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity
     static SharedPreferences.Editor email ;
     static SharedPreferences prefs;
     trip o;
-    boolean in;
+    boolean n;
     public void read() {
 
         firebase.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -76,16 +76,17 @@ public class MainActivity extends AppCompatActivity
         price = findViewById(R.id.price);
         enter = findViewById(R.id.enter);
         emailed = findViewById(R.id.email);
-        email = getSharedPreferences("Email", MODE_PRIVATE).edit();
-        prefs = getSharedPreferences("Email", MODE_PRIVATE);
-        if (prefs.getString("email",null)!=null) {
+        email = getSharedPreferences("Email",MODE_MULTI_PROCESS).edit();
+        prefs = getSharedPreferences("Email",MODE_MULTI_PROCESS);
+        if (prefs.getString("email",new String())!=null) {
             findViewById(R.id.login).setVisibility(View.GONE);
             findViewById(R.id.x).setVisibility(View.VISIBLE);
-            firebase = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email",null)).child("trip");
+            firebase = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email",new String())).child("trip");
             alluser= FirebaseDatabase.getInstance().getReference("user");
             read();
         }
         stopService(new Intent(MainActivity.this,FireBaseService.class));
+        FireBaseService.close();
         startService(new Intent(MainActivity.this,FireBaseService.class));
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -102,26 +103,16 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         list.clear();
-                        in=true;
                         trip trip1 = new trip();
                         for (DataSnapshot g : dataSnapshot.getChildren()) {
                             user = FirebaseDatabase.getInstance().getReference("user").child(g.getKey()).child("trip");
-                                trip1.setName(name.getText().toString());
-                                trip1.setPalace(palace.getText().toString());
-                                trip1.setPrice(Double.parseDouble(price.getText().toString()));
-                                trip1.setRead(false);
-                                user.push().setValue(trip1);
-                                if(g.getKey()==prefs.getString("email",null))
-                                in=false;
+                            trip1.setName(name.getText().toString());
+                            trip1.setPalace(palace.getText().toString());
+                            trip1.setPrice(Double.parseDouble(price.getText().toString()));
+                            trip1.setRead(false);
+                            user.push().setValue(trip1);
                         }
-if(in){
-    user = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email",null)).child("trip");
-    trip1.setName(name.getText().toString());
-    trip1.setPalace(palace.getText().toString());
-    trip1.setPrice(Double.parseDouble(price.getText().toString()));
-    trip1.setRead(false);
-    user.push().setValue(trip1);}}
-
+                    }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
 
@@ -152,8 +143,7 @@ if(in){
 
                                     @Override
                                     public void onCancelled(DatabaseError databaseError) {
-
-                                    }
+                                                                            }
                                 });
 
                             }
@@ -164,7 +154,6 @@ if(in){
 
                         }
                     });
-                    read();
                 } else {
                     Toast.makeText(MainActivity.this, "please select item", Toast.LENGTH_SHORT).show();
                 }
@@ -174,10 +163,27 @@ if(in){
             @Override
             public void onClick(View v) {
                 if (!emailed.getText().toString().matches("")) {
+                    stopService(new Intent(MainActivity.this,FireBaseService.class));
+                    FireBaseService.close();
                     email.putString("email",emailed.getText().toString());
                     email.commit();
-                    firebase = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email",null)).child("trip");
-                    stopService(new Intent(MainActivity.this,FireBaseService.class));
+                    n=true;
+                    firebase1 = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email",new String()));
+                    alluser.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                           for(DataSnapshot g: dataSnapshot.getChildren()){
+                             if(g.getKey().equals(prefs.getString("email",new String()))){
+                                 n=false;break;
+                             }
+                           }
+                           if(n){firebase1.push().setValue("id"); }
+                        }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }});
+                    firebase = FirebaseDatabase.getInstance().getReference("user").child(prefs.getString("email",new String())).child("trip");
                     startService(new Intent(MainActivity.this,FireBaseService.class));
                     Toast.makeText(MainActivity.this, "Done", Toast.LENGTH_SHORT).show();
                     findViewById(R.id.x).setVisibility(View.VISIBLE);
@@ -233,7 +239,6 @@ if(in){
             findViewById(R.id.x).setVisibility(View.GONE);
             findViewById(R.id.in).setVisibility(View.GONE);
             findViewById(R.id.login).setVisibility(View.VISIBLE);
-            read();
         } else if (id == R.id.nav_gallery) {
             findViewById(R.id.x).setVisibility(View.VISIBLE);
             findViewById(R.id.in).setVisibility(View.GONE);
